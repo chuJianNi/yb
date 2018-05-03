@@ -66,7 +66,7 @@ namespace LiaoChengZYSI.Control
 
         Process proManager = new Process();
 
-        private sei.CoClass_com4his seiInterfaceProxy = new sei.CoClass_com4his();
+        //private sei.CoClass_com4his seiInterfaceProxy = new sei.CoClass_com4his();
 
         private Neusoft.FrameWork.Public.ObjectHelper doseHelper = new Neusoft.FrameWork.Public.ObjectHelper();
         private Neusoft.HISFC.BizProcess.Integrate.Manager interMgr = new Neusoft.HISFC.BizProcess.Integrate.Manager();
@@ -1000,6 +1000,7 @@ namespace LiaoChengZYSI.Control
                     break;
             }
         }
+
         /// <summary>
         /// 下载对照好的目录信息
         /// </summary>
@@ -1018,16 +1019,16 @@ namespace LiaoChengZYSI.Control
                 return -1;
             }
 
-            returnValue = this.proManager.QueryUndrugLists(ref comparedItemList,this.pactCode.ID);
+            returnValue = this.proManager.QueryUndrugLists(ref comparedItemList, this.pactCode.ID);
             if (returnValue < 0)
             {
                 Neusoft.FrameWork.WinForms.Classes.Function.HideWaitForm();
-                MessageBox.Show("接口获取中心已对照目录信息失败 "+this.proManager.ErrMsg);
+                MessageBox.Show("接口获取中心已对照目录信息失败 " + this.proManager.ErrMsg);
                 return -1;
             }
 
-            returnValue=this.proManager.Disconnect();
-            if(returnValue <0)
+            returnValue = this.proManager.Disconnect();
+            if (returnValue < 0)
             {
                 Neusoft.FrameWork.WinForms.Classes.Function.HideWaitForm();
                 MessageBox.Show(this.proManager.ErrMsg);
@@ -1035,9 +1036,9 @@ namespace LiaoChengZYSI.Control
             }
 
 
-            
+
             Neusoft.FrameWork.Management.PublicTrans.BeginTransaction();
-         
+
             this.localManager.SetTrans(Neusoft.FrameWork.Management.PublicTrans.Trans);
 
             //先删除数据
@@ -1058,7 +1059,7 @@ namespace LiaoChengZYSI.Control
                     return -1;
                 }
             }
-          
+
             Neusoft.FrameWork.Management.PublicTrans.Commit();
             return 1;
         }
@@ -1374,6 +1375,7 @@ namespace LiaoChengZYSI.Control
 
             MessageBox.Show("上传本地项目成功！");
         }
+                
         #endregion
     }
 }
