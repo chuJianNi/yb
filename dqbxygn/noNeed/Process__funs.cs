@@ -64,6 +64,154 @@ namespace noNeed
             return 1;
         }
 
+        #region 这个region里下面的方法没有用到过
+
+        #endregion
+
+        /// <summary>
+        /// 数据库回滚,成功 1 失败 -1
+        /// </summary>
+        /// <returns>成功 1 失败 -1</returns>
+        public long Rollback()
+        {
+            int returnValue = 0;
+
+            switch (rollbackTypeSI)
+            {
+                case 11://普通门诊撤销结算
+                    {
+
+                    }
+                    break;
+                case 12://门规撤销结算
+                    {
+                        returnValue = this.seiInterfaceProxy.init_mzmg(this.regBack.SIMainInfo.ProceatePcNo, this.regBack.SIMainInfo.MedicalType.ID, this.regBack.SIMainInfo.CardOrgID, this.regBack.Name, this.ConvertSex(this.regBack.Sex.ID.ToString()),
+                this.regBack.ID, System.DateTime.Now, this.regBack.DoctorInfo.Templet.Doct.ID, this.regBack.SIMainInfo.InDiagnose.ID, this.regBack.SIMainInfo.SpecialCare.ID, this.regBack.SSN, this.regBack.SIMainInfo.SpecialCare.Name, "");
+                        if (returnValue != 0)
+                        {
+                            this.errText = "门诊结算回滚时初始化患者信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                            return -1;
+                        }
+                        returnValue = this.seiInterfaceProxy.destroy_mzmg(this.regBack.SIMainInfo.BusinessSequence);
+                        if (returnValue != 0)
+                        {
+                            this.errText = "撤销门诊结算信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                            return -1;
+                        }
+                    }
+
+                    break;
+                case 13://急诊患者撤销结算
+                    {
+
+
+                    }
+                    break;
+                case 14://特殊人员门诊撤销结算
+                    {
+
+                    }
+                    break;
+                case 15://普通门诊退费
+                    break;
+                case 16://门规退费
+                    break;
+                case 17://急诊门诊退费
+                    break;
+                case 21:
+                    //初始化住院服务
+                    returnValue = this.seiInterfaceProxy.init_zy(this.patientInfoBack.ID);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对出院结算回滚时初始化住院登记信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //撤销出院登记
+                    returnValue = this.seiInterfaceProxy.destroy_cy();
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对出院结算回滚时撤销出院登记失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //撤销出院结算
+                    returnValue = this.seiInterfaceProxy.destroy_zyjs(this.patientInfoBack.SIMainInfo.BusinessSequence);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对出院结算回滚时撤销出院结算失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //撤销所有上传的费用凭单
+                    returnValue = this.seiInterfaceProxy.destroy_all_fypd();
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对出院结算回滚时撤销所有费用凭单失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //作废预交金
+                    returnValue = this.seiInterfaceProxy.add_yj(this.patientInfoBack.ID, -(double)this.patientInfoBack.FT.PrepayCost);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "作废押金失败！。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+                    break;
+                case 22:
+                    //初始化住院服务
+                    returnValue = this.seiInterfaceProxy.init_zy(this.patientInfoBack.ID);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对住院登记回滚时初始化住院登记信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //撤销住院登记
+                    returnValue = this.seiInterfaceProxy.destroy_zydj();
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对住院登记回滚时撤销出院登记失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+                    break;
+                case 23:
+                    //初始化住院服务
+                    returnValue = this.seiInterfaceProxy.init_zy(this.patientInfoBack.ID);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对出院结算回滚时初始化住院登记信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //撤销所有上传的费用凭单
+                    returnValue = this.seiInterfaceProxy.destroy_all_zypd(this.patientInfoBack.ID);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "对出院结算回滚时撤销所有费用凭单失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //作废所有上传过的预交金
+                    returnValue = this.seiInterfaceProxy.add_yj(this.patientInfoBack.ID, -(double)this.patientInfoBack.FT.PrepayCost);
+                    if (returnValue != 0)
+                    {
+                        this.errText = "作废押金失败！。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+                    break;
+                case 24:
+                    break;
+
+                default:
+                    break;
+            }
+            this.rollbackTypeSI = 0;
+            this.isNeedPrint = false;
+            return 1;
+        }
+
         #endregion
 
         #region 属于“本地方法”中的内容
@@ -140,10 +288,530 @@ namespace noNeed
         }
         #endregion
 
+        #region 这个region里下面的方法没有用到过
 
         #endregion
 
+        #region 查询医保项目自负比例
+        /// <summary>
+        /// 查询医保项目自负比例
+        /// </summary>
+        /// <param name="sbjCode">社保局编码</param>
+        /// <param name="centerNO">中心项目编码</param>
+        /// <param name="date">日期</param>
+        /// <param name="al">返回该项目自负比例数组</param>
+        /// <returns>成功 0</returns>
+        public int QueryCenterItemRate(string sbjCode, string centerNO, DateTime date, ref ArrayList al)
+        {
+            string tempStr = this.seiInterfaceProxy.get_zfbl(sbjCode, centerNO, date);
+            if (string.IsNullOrEmpty(tempStr))
+            {
+                this.errText = this.seiInterfaceProxy.get_errtext();
+                return -1;
+            }
+            if (tempStr.Trim() == "0")
+            {
+                Neusoft.FrameWork.Models.NeuObject obj = new Neusoft.FrameWork.Models.NeuObject();
+                obj.ID = "0";
+                obj.Name = "无自负比例";
+                al.Add(obj);
+                return 1;
+            }
+            string[] centerItemRates = tempStr.Split('/');
+            if (centerItemRates.Length > 1)
+            {
+                for (int i = 0; i < centerItemRates.Length - 1; i++)
+                {
+                    Neusoft.FrameWork.Models.NeuObject obj = new Neusoft.FrameWork.Models.NeuObject();
+                    char[] cc = { '|' };
+                    centerItemRates[i] = centerItemRates[i].Replace("#v", "|");
+                    string[] centerItemRate = centerItemRates[i].Split(cc);
+                    obj.ID = centerItemRate[0];
+                    obj.Name = centerItemRate[1];
+                    al.Add(obj);
+                }
+            }
+
+            return 1;
+        }
+
+
+        #endregion
+
+        #region 根据参数处理登记信息相关
+        /// <summary>
+        /// 根据参数处理登记信息相关（）
+        /// 目前济南医保只有住院登记，其余登记相关信息均返回1
+        /// </summary>
+        /// <param name="patient">登记类型:0 入院登记1 出院登记</param>
+        /// <param name="regType">交易类型:1 正交易 -1  反交易</param>
+        /// <param name="transType"></param>
+        /// <returns></returns>
+        private int processInpatientReg(Neusoft.HISFC.Models.RADT.PatientInfo patient, int regType, int transType)
+        {
+            try
+            {
+                int returnValue = 0;
+                string bcString = string.Empty;
+
+                if (regType == 0 && transType == 1)
+                {
+                    #region 处理住院登记
+                    if (string.IsNullOrEmpty(patient.SSN))
+                    {
+                        this.errText = "医保读卡信息为空，请先读卡以后办理入院登记！";
+                        return -1;
+                    }
+
+                    Control.frmSiPobInpatientInfo frmpob = new Control.frmSiPobInpatientInfo();
+                    frmpob.Patient = patient;
+                    frmpob.Text = "山东省—住院登记";
+                    frmpob.ShowDialog();
+
+                    DialogResult result = frmpob.DialogResult;
+
+                    if (result != DialogResult.OK)
+                    {
+                        return -1;
+                    }
+
+                    //省异地
+                    if (patient.SIMainInfo.ProceatePcNo == "370000")
+                    {
+                        bcString = "cbdsbh#" + patient.SIMainInfo.CivilianGrade.ID + "|" + "cbjgmc#" + patient.SIMainInfo.CivilianGrade.Name;
+                    }
+                    else
+                    {
+                        bcString = "";
+                    }
+
+                    returnValue = this.seiInterfaceProxy.save_zydj(patient.ID, patient.SIMainInfo.CardOrgID, patient.SSN, patient.Name, this.ConvertSex(patient.Sex.ID.ToString()),
+                        patient.SIMainInfo.AppNo.ToString(), patient.SIMainInfo.ProceatePcNo, patient.SIMainInfo.SpecialCare.ID, patient.PVisit.PatientLocation.Dept.ID, frmpob.Patient.PVisit.InTime,
+                        "", "", patient.SIMainInfo.EmplType, patient.SIMainInfo.SpecialCare.Name, bcString);
+
+                    if (returnValue != 0)
+                    {
+                        this.errText = "接口住院登记失败。\n错误代码：" + returnValue + "\n错误信息： " + this.seiInterfaceProxy.get_errtext();
+                        return -1;
+                    }
+
+                    //返回备注信息
+                    string memo = this.seiInterfaceProxy.result_s("bz");
+
+                    this.rollbackTypeSI = 22; //入院登记回滚
+
+                    this.patientInfoBack = patient;
+
+                    this.businessSequenceZY = patient.ID;
+                    localManager.SetTrans(this.trans);
+                    string balanceNO = this.localManager.GetBalNo(patient.ID);
+                    bool isModify = false;
+                    if (balanceNO == null || balanceNO == string.Empty || balanceNO == "")
+                    {
+                        //balanceNO = "0";
+                        patient.SIMainInfo.BalNo = "1";
+                    }
+                    else
+                    {
+                        isModify = true;
+                        patient.SIMainInfo.BalNo = balanceNO;
+                    }
+
+                    //balanceNO = (Neusoft.FrameWork.Function.NConvert.ToInt32(balanceNO) + 1).ToString();
+                    //patient.SIMainInfo.BalNo = balanceNO;
+                    patient.SIMainInfo.IsValid = true;
+                    patient.SIMainInfo.OperDate = patient.PVisit.InTime;
+                    patient.SIMainInfo.OperInfo.ID = this.localManager.Operator.ID;//获取当前操作员信息
+                    patient.SIMainInfo.BusinessSequence = "";//this.BusinessSequenceZY;
+
+                    if (isModify)
+                    {
+                        returnValue = this.localManager.UpdateSiMainInfo(patient);
+                    }
+                    else
+                    {
+                        returnValue = this.localManager.InsertSIMainInfo(patient);
+                    }
+                    if (returnValue < 0)
+                    {
+                        this.errText = this.localManager.Err;
+                        return -1;
+                    }
+
+                    returnValue = this.localManager.UpdateTreatmentInfoInmaininfo(patient);
+                    if (returnValue < 0)
+                    {
+                        this.errText = this.localManager.Err;
+                        return -1;
+                    }
+
+                    returnValue = this.localManager.updateTransType("1", patient.ID, patient.SIMainInfo.BalNo);
+                    if (returnValue < 0)
+                    {
+                        this.errText = this.localManager.Err;
+                        return -1;
+                    }
+
+                    #endregion
+                }
+            }
+            catch (Exception e)
+            {
+                this.errText = e.Message;
+
+                return -1;
+            }
+
+            return 1;
+        }
+        #endregion
+        #endregion
+
         #region 属于“Imedcare 成员”中的内容
+        public bool IsInBlackList(Neusoft.HISFC.Models.Registration.Register r)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public bool IsInBlackList(Neusoft.HISFC.Models.RADT.PatientInfo patient)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public int MidBalanceInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, ref System.Collections.ArrayList feeDetails)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public int ModifyUploadedFeeDetailInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, Neusoft.HISFC.Models.Fee.Inpatient.FeeItemList f)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public int ModifyUploadedFeeDetailOutpatient(Neusoft.HISFC.Models.Registration.Register r, Neusoft.HISFC.Models.Fee.Outpatient.FeeItemList f)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        /// <summary>
+        /// 调用此方法补打统筹结算单
+        /// </summary>
+        /// <param name="patient"></param>
+        /// <param name="feeDetails"></param>
+        /// <returns></returns>
+        public int ModifyUploadedFeeDetailsInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, ref System.Collections.ArrayList feeDetails)
+        {
+            int returnValue = 0;
+            returnValue = this.seiInterfaceProxy.init_zy(patient.ID);
+            if (returnValue != 0)
+            {
+                this.errText = "初始化住院登记信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                return -1; ;
+            }
+
+            returnValue = this.seiInterfaceProxy.printdj(patient.SIMainInfo.BusinessSequence, "JSD");
+            if (returnValue != 0)
+            {
+                this.errText = "补打统筹结算单据信息失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                return -1; ;
+            }
+
+            return 1;
+        }
+
+        public int ModifyUploadedFeeDetailsOutpatient(Neusoft.HISFC.Models.Registration.Register r, ref System.Collections.ArrayList feeDetails)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        /// <summary>
+        /// 住院预结算
+        /// </summary>
+        /// <param name="patient"></param>
+        /// <param name="feeDetails"></param>
+        /// <returns></returns>
+        public int PreBalanceInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, ref System.Collections.ArrayList feeDetails)
+        {
+            if (this.sourceObject.ToString() == "Neusoft.HISFC.Components.InpatientFee.Balance.ucBalance")
+            {
+                Control.frmSIBalanceInfo siBalance = new LiaoChengZYSI.Control.frmSIBalanceInfo();
+                siBalance.Patient = patient;
+                siBalance.ShowDialog();
+                if (siBalance.DialogResult == DialogResult.OK)
+                {
+                    patient.FT.PubCost = patient.SIMainInfo.PubCost;
+                    patient.FT.PayCost = patient.SIMainInfo.PayCost;
+                    patient.FT.OwnCost = patient.SIMainInfo.OwnCost;
+                }
+                else
+                {
+                    this.errText = "结算已被取消！";
+                    return -1;
+                }
+            }
+            return 1; ;
+        }
+
+        /// <summary>
+        /// 门诊预结算
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="feeDetails"></param>
+        /// <returns></returns>
+        public int PreBalanceOutpatient(Neusoft.HISFC.Models.Registration.Register r, ref System.Collections.ArrayList feeDetails)
+        {
+            if (this.sourceObject.ToString() == "Neusoft.HISFC.Components.OutpatientFee.Controls.ucCharge" || this.sourceObject.ToString() == "Neusoft.HISFC.Components.OutpatientFee.Controls.ucQuitFee")
+            {
+                foreach (Neusoft.HISFC.Models.Fee.Outpatient.FeeItemList feeItemList in feeDetails)
+                {
+                    r.SIMainInfo.TotCost += feeItemList.FT.TotCost;
+                    r.SIMainInfo.OwnCost += feeItemList.FT.TotCost;
+                    r.SIMainInfo.PayCost = 0;
+                    r.SIMainInfo.PubCost = 0;
+                }
+            }
+            return 1;
+        }
+
+        public int QueryBlackLists(ref System.Collections.ArrayList blackLists)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+
+
+        public int QueryDrugLists(ref System.Collections.ArrayList drugLists)
+        {
+            return 1;
+        }
+
+        public int QueryUndrugLists(ref System.Collections.ArrayList comparedList)
+        {
+            return 1;
+        }
+
+        public int RecomputeFeeItemListInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, Neusoft.HISFC.Models.Fee.Inpatient.FeeItemList feeItemList)
+        {
+            return 1;
+        }
+
+        /// <summary>
+        /// 读卡后,设置住院患者基本信息
+        /// </summary>
+        /// <param name="r">患者挂号信息实体</param>
+        /// <param name="readCardType">当前读卡状态</param>
+        /// <param name="dataBuffer">读卡返回的信息字符串</param>
+        private int SetInpatientRegInfo(Neusoft.HISFC.Models.RADT.PatientInfo p, ReadCardTypes readCardType)
+        {
+            switch (readCardType)
+            {
+                case ReadCardTypes.住院读卡:
+
+                    //p.IDCard = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+                    p.SIMainInfo.CardOrgID = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+                    p.Birthday = Neusoft.FrameWork.Function.NConvert.ToDateTime(this.seiInterfaceProxy.result_s("csrq"));//出生日期
+                    p.SIMainInfo.ICCardCode = this.seiInterfaceProxy.result_s("ylzbh");
+                    p.Card.ICCard.ID = p.SIMainInfo.ICCardCode;//医保卡号
+                    p.SSN = p.SIMainInfo.ICCardCode;
+                    p.CompanyName = this.seiInterfaceProxy.result_s("dwmc");//工作单位
+                    p.SIMainInfo.ProceatePcNo = this.seiInterfaceProxy.result_s("sbjbm");//社保局编码 ,省直为379902
+                    p.SIMainInfo.ApplySequence = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    p.SIMainInfo.PersonType.Name = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    p.SIMainInfo.PersonType.ID = this.seiInterfaceProxy.result_s("sbjglx");//社保机构类型：A：职工  B：居民
+
+                    p.SIMainInfo.IndividualBalance = (decimal)this.seiInterfaceProxy.result_n("ye");//余额
+                    p.SIMainInfo.SiState = this.seiInterfaceProxy.result_s("zfbz");// *灰白名单标志:0 代表灰名单,1 白名单
+                    p.SIMainInfo.SpecialWorkKind.Name = this.seiInterfaceProxy.result_s("zfsm");//灰白名单说明
+                    p.SIMainInfo.ApplyType.ID = this.seiInterfaceProxy.result_s("zhzybz");  //有无15(医保参数制)天内的住院记录1:有 ,0 :无
+                    p.SIMainInfo.ApplyType.Name = this.seiInterfaceProxy.result_s("zhzysm");//15(医保参数控制)天内的住院记录说明
+                    p.SIMainInfo.Name = this.seiInterfaceProxy.result_s("xm");// 姓名
+                    p.Name = p.SIMainInfo.Name;
+                    p.Sex.ID = this.ConvertSex(this.seiInterfaceProxy.result_s("xb"));//性别
+                    //p.SIMainInfo.Fund.ID = this.seiInterfaceProxy.result_s("yfdxbz");//优抚对象标志,’1’为优抚对象
+                    //p.SIMainInfo.Fund.Name = this.seiInterfaceProxy.result_s("yfdxlb");//优抚对象人员类别(汉字说明)
+                    p.SIMainInfo.AnotherCity.Name = this.seiInterfaceProxy.result_s("zcyymc"); //存储转出医院名称，不为空则代表转院
+                    p.SIMainInfo.AnotherCity.ID = this.seiInterfaceProxy.result_s("ydbz");//是否为异地人员
+                    p.SIMainInfo.Disease.Name = this.seiInterfaceProxy.result_s("mzdbjbs");//疾病编码
+                    //p.Pact.ID = "3";//省医保
+                    p.SIMainInfo.CivilianGrade.ID = this.seiInterfaceProxy.result_s("cbdsbh");//参保地市编号
+                    p.SIMainInfo.CivilianGrade.Name = this.seiInterfaceProxy.result_s("cbjgmc");//参保地市名称
+
+                    if (p.SIMainInfo.ProceatePcNo == "379902")
+                    {
+                        p.Pact.ID = "3";//省直医保
+                        p.SIMainInfo.CivilianGrade.ID = p.SIMainInfo.ProceatePcNo;//参保地市编号
+                        p.SIMainInfo.CivilianGrade.Name = "山东省直";//参保地市名称
+                    }
+                    else
+                    {
+                        p.Pact.ID = "7";//省异地医保
+                    }
+                    break;
+
+                case ReadCardTypes.无卡:
+                    //p.IDCard = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+                    p.SIMainInfo.CardOrgID = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+
+                    p.Birthday = Neusoft.FrameWork.Function.NConvert.ToDateTime(this.seiInterfaceProxy.result_s("csrq"));//出生日期
+                    //p.SIMainInfo.ICCardCode = this.seiInterfaceProxy.result_s("ylzbh");
+                    p.Card.ICCard.ID = p.SIMainInfo.ICCardCode;//医保卡号
+                    p.SSN = p.SIMainInfo.CardOrgID;
+                    p.CompanyName = this.seiInterfaceProxy.result_s("dwmc");//工作单位
+                    p.SIMainInfo.ProceatePcNo = this.seiInterfaceProxy.result_s("sbjbm");//社保局编码 ,省直为379902
+                    p.SIMainInfo.ApplySequence = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    p.SIMainInfo.PersonType.Name = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    p.SIMainInfo.PersonType.ID = this.seiInterfaceProxy.result_s("sbjglx");//社保机构类型：A：职工  B：居民
+
+                    //p.SIMainInfo.IndividualBalance = (decimal)this.seiInterfaceProxy.result_n("ye");//余额
+                    p.SIMainInfo.SiState = this.seiInterfaceProxy.result_s("zfbz");// *灰白名单标志:0 代表灰名单,1 白名单
+                    p.SIMainInfo.SpecialWorkKind.Name = this.seiInterfaceProxy.result_s("zfsm");//灰白名单说明
+                    p.SIMainInfo.ApplyType.ID = this.seiInterfaceProxy.result_s("zhzybz");  //有无15(医保参数制)天内的住院记录1:有 ,0 :无
+                    p.SIMainInfo.ApplyType.Name = this.seiInterfaceProxy.result_s("zhzysm");//15(医保参数控制)天内的住院记录说明
+                    p.SIMainInfo.Name = this.seiInterfaceProxy.result_s("xm");// 姓名
+                    p.Name = p.SIMainInfo.Name;
+                    p.Sex.ID = this.ConvertSex(this.seiInterfaceProxy.result_s("xb"));//性别
+                    //p.SIMainInfo.Fund.ID = this.seiInterfaceProxy.result_s("yfdxbz");//优抚对象标志,’1’为优抚对象
+                    //p.SIMainInfo.Fund.Name = this.seiInterfaceProxy.result_s("yfdxlb");//优抚对象人员类别(汉字说明)
+                    p.SIMainInfo.AnotherCity.Name = this.seiInterfaceProxy.result_s("zcyymc"); //存储转出医院名称，不为空则代表转院
+                    p.SIMainInfo.AnotherCity.ID = this.seiInterfaceProxy.result_s("ydbz");//是否为异地人员
+                    p.SIMainInfo.Disease.Name = this.seiInterfaceProxy.result_s("mzdbjbs");//疾病编码
+                    //p.Pact.ID = "3";//省医保
+
+                    p.SIMainInfo.CivilianGrade.ID = this.seiInterfaceProxy.result_s("cbdsbh");//参保地市编号
+                    p.SIMainInfo.CivilianGrade.Name = this.seiInterfaceProxy.result_s("cbjgmc");//参保地市名称
+
+                    if (p.SIMainInfo.ProceatePcNo == "379902")
+                    {
+                        p.Pact.ID = "3";//省直医保
+                        p.SIMainInfo.CivilianGrade.ID = p.SIMainInfo.ProceatePcNo;//参保地市编号
+                        p.SIMainInfo.CivilianGrade.Name = "山东省直";//参保地市名称
+                    }
+                    else
+                    {
+                        p.Pact.ID = "7";//省异地医保
+                    }
+                    break;
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// 读卡后,设置门诊患者基本信息
+        /// </summary>
+        /// <param name="r">患者挂号信息实体</param>
+        /// <param name="readCardType">当前读卡状态</param>
+        /// <returns></returns>
+        private int SetOutpatientRegInfo(Neusoft.HISFC.Models.Registration.Register r, ReadCardTypes readCardType)
+        {
+            string name = string.Empty;
+            switch (readCardType)
+            {
+                case ReadCardTypes.门诊读卡:
+                    //r.IDCard = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+                    r.SIMainInfo.CardOrgID = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+
+                    r.Birthday = Neusoft.FrameWork.Function.NConvert.ToDateTime(this.seiInterfaceProxy.result_s("csrq"));//出生日期
+                    r.SIMainInfo.ICCardCode = this.seiInterfaceProxy.result_s("ylzbh");
+                    r.Card.ICCard.ID = r.SIMainInfo.ICCardCode;//医保卡号
+                    r.SSN = r.SIMainInfo.ICCardCode;
+                    r.CompanyName = this.seiInterfaceProxy.result_s("dwmc");//工作单位
+                    r.SIMainInfo.ProceatePcNo = this.seiInterfaceProxy.result_s("sbjbm");//社保局编码 ,省直为379902
+                    r.SIMainInfo.ApplySequence = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    r.SIMainInfo.PersonType.Name = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    r.SIMainInfo.PersonType.ID = this.seiInterfaceProxy.result_s("sbjglx");//社保机构类型：A：职工  B：居民
+
+                    r.SIMainInfo.IndividualBalance = (decimal)this.seiInterfaceProxy.result_n("ye");//余额
+                    r.SIMainInfo.SiState = this.seiInterfaceProxy.result_s("zfbz");// *灰白名单标志:0 代表灰名单,1 白名单
+                    r.SIMainInfo.SpecialWorkKind.Name = this.seiInterfaceProxy.result_s("zfsm");//灰白名单说明
+                    r.SIMainInfo.ApplyType.ID = this.seiInterfaceProxy.result_s("zhzybz");  //有无15(医保参数制)天内的住院记录1:有 ,0 :无
+                    r.SIMainInfo.ApplyType.Name = this.seiInterfaceProxy.result_s("zhzysm");//15(医保参数控制)天内的住院记录说明
+                    r.SIMainInfo.Name = this.seiInterfaceProxy.result_s("xm");// 姓名
+                    r.Name = r.SIMainInfo.Name;
+                    r.Sex.ID = this.ConvertSex(this.seiInterfaceProxy.result_s("xb"));//性别
+                    //r.SIMainInfo.Fund.ID = this.seiInterfaceProxy.result_s("yfdxbz");//优抚对象标志,’1’为优抚对象
+                    //r.SIMainInfo.Fund.Name = this.seiInterfaceProxy.result_s("yfdxlb");//优抚对象人员类别(汉字说明)
+                    r.SIMainInfo.AnotherCity.Name = this.seiInterfaceProxy.result_s("zcyymc"); //存储转出医院名称，不为空则代表转院
+                    r.SIMainInfo.AnotherCity.ID = this.seiInterfaceProxy.result_s("ydbz");//是否为异地人员
+                    r.SIMainInfo.Disease.Name = this.seiInterfaceProxy.result_s("mzdbjbs");//疾病编码
+                    //r.Pact.ID = "3";//省医保
+
+                    r.SIMainInfo.CivilianGrade.ID = this.seiInterfaceProxy.result_s("cbdsbh");//参保地市编号
+                    r.SIMainInfo.CivilianGrade.Name = this.seiInterfaceProxy.result_s("cbjgmc");//参保地市名称
+
+                    if (r.SIMainInfo.ProceatePcNo == "379902")
+                    {
+                        r.Pact.ID = "3";//省直医保
+                        r.SIMainInfo.CivilianGrade.ID = r.SIMainInfo.ProceatePcNo;//参保地市编号
+                        r.SIMainInfo.CivilianGrade.Name = "山东省直";//参保地市名称
+                    }
+                    else
+                    {
+                        r.Pact.ID = "7";//省异地医保
+                    }
+                    break;
+
+
+                case ReadCardTypes.无卡:
+                    //r.IDCard = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+                    r.SIMainInfo.CardOrgID = this.seiInterfaceProxy.result_s("shbzhm");//社会保障号码
+
+                    r.Birthday = Neusoft.FrameWork.Function.NConvert.ToDateTime(this.seiInterfaceProxy.result_s("csrq"));//出生日期
+                    r.SIMainInfo.ICCardCode = this.seiInterfaceProxy.result_s("ylzbh");
+                    r.Card.ICCard.ID = r.SIMainInfo.ICCardCode;//医保卡号
+                    r.SSN = r.SIMainInfo.ICCardCode;
+                    r.CompanyName = this.seiInterfaceProxy.result_s("dwmc");//工作单位
+                    r.SIMainInfo.ProceatePcNo = this.seiInterfaceProxy.result_s("sbjbm");//社保局编码 ,省直为379902
+                    r.SIMainInfo.ApplySequence = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    r.SIMainInfo.PersonType.Name = this.seiInterfaceProxy.result_s("ylrylb");//医疗人员类别
+
+                    r.SIMainInfo.PersonType.ID = this.seiInterfaceProxy.result_s("sbjglx");//社保机构类型：A：职工  B：居民
+
+                    r.SIMainInfo.IndividualBalance = (decimal)this.seiInterfaceProxy.result_n("ye");//余额
+                    r.SIMainInfo.SiState = this.seiInterfaceProxy.result_s("zfbz");// *灰白名单标志:0 代表灰名单,1 白名单
+                    r.SIMainInfo.SpecialWorkKind.Name = this.seiInterfaceProxy.result_s("zfsm");//灰白名单说明
+                    r.SIMainInfo.ApplyType.ID = this.seiInterfaceProxy.result_s("zhzybz");  //有无15(医保参数制)天内的住院记录1:有 ,0 :无
+                    r.SIMainInfo.ApplyType.Name = this.seiInterfaceProxy.result_s("zhzysm");//15(医保参数控制)天内的住院记录说明
+                    r.SIMainInfo.Name = this.seiInterfaceProxy.result_s("xm");// 姓名
+                    r.Name = r.SIMainInfo.Name;
+                    r.Sex.ID = this.ConvertSex(this.seiInterfaceProxy.result_s("xb"));//性别
+                    //r.SIMainInfo.Fund.ID = this.seiInterfaceProxy.result_s("yfdxbz");//优抚对象标志,’1’为优抚对象
+                    //r.SIMainInfo.Fund.Name = this.seiInterfaceProxy.result_s("yfdxlb");//优抚对象人员类别(汉字说明)
+                    r.SIMainInfo.AnotherCity.Name = this.seiInterfaceProxy.result_s("zcyymc"); //存储转出医院名称，不为空则代表转院
+                    r.SIMainInfo.AnotherCity.ID = this.seiInterfaceProxy.result_s("ydbz");//是否为异地人员
+                    r.SIMainInfo.Disease.Name = this.seiInterfaceProxy.result_s("mzdbjbs");//疾病编码
+                    //r.Pact.ID = "3";//省医保
+
+                    r.SIMainInfo.CivilianGrade.ID = this.seiInterfaceProxy.result_s("cbdsbh");//参保地市编号
+                    r.SIMainInfo.CivilianGrade.Name = this.seiInterfaceProxy.result_s("cbjgmc");//参保地市名称
+
+                    if (r.SIMainInfo.ProceatePcNo == "379902")
+                    {
+                        r.Pact.ID = "3";//省直医保
+                        r.SIMainInfo.CivilianGrade.ID = r.SIMainInfo.ProceatePcNo;//参保地市编号
+                        r.SIMainInfo.CivilianGrade.Name = "山东省直";//参保地市名称
+                    }
+                    else
+                    {
+                        r.Pact.ID = "7";//省异地医保
+                    }
+                    break;
+
+            }
+
+            return 1;
+        }
+
+        #region 这个region里上面的方法没有用到过
+
+        #endregion
 
         /// <summary>
         /// 批量上传住院患者费用
@@ -442,6 +1110,206 @@ namespace noNeed
                 this.errText = "撤销医保患者【" + patient.Name + "】已上传的费用凭单失败。\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
                 return -1;
             }
+            return 1;
+        }
+
+        /// <summary>
+        /// 根据需求将此方法征用
+        /// 获取中心对照好的目录信息
+        /// </summary>
+        /// <param name="undrugLists"></param>
+        /// <returns></returns>
+        public int QueryUndrugLists(ref System.Collections.ArrayList comparedList, string pactCode)
+        {
+            DateTime sysDate = this.localManager.GetDateTimeFromSysDateTime();
+
+            string filePathZL = Application.StartupPath + "\\DownloadFile\\comparedItemList-s.txt";
+
+            //如果有先删除
+            if (System.IO.File.Exists(filePathZL))
+            {
+                System.IO.File.Delete(filePathZL);
+            }
+
+            string logPath = Application.StartupPath + "\\DownloadFile\\ComparedLog.log";
+            if (System.IO.File.Exists(logPath))
+            {
+                System.IO.File.Delete(logPath);
+            }
+
+            //int returnValue = this.seiInterfaceProxy.down_yyxm("379902", filePathZL, 1, false);
+            int returnValue = this.seiInterfaceProxy.down_yyxm_info("372500", filePathZL, 1, false, "2");
+
+            if (returnValue != 0)
+            {
+                this.errText = "下载医保已对照完的药品和非药品目录失败 \n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                return -1;
+            }
+
+            #region 目录读取
+            System.IO.StreamReader sr = new System.IO.StreamReader(filePathZL, System.Text.Encoding.Default);
+            Neusoft.HISFC.Models.Base.Spell spell = new Neusoft.HISFC.Models.Base.Spell();
+
+            try
+            {
+                string line = "";
+                Neusoft.HISFC.Models.SIInterface.Compare compare = null;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (line == "")
+                        continue;
+                    char[] v = new char[] { (char)'\t' };
+                    string[] vstr = line.Split(v);
+                    if (vstr.Length < 17)
+                    {
+                        continue;
+                    }
+                    compare = new Neusoft.HISFC.Models.SIInterface.Compare();
+
+                    if (this.localManager.WirteDebugLog(logPath, vstr[0].ToString() + "   " + vstr[1].ToString() + "   " + vstr[4].ToString()) == -1)
+                    {
+                        this.errText = this.localManager.Err;
+                        return -1;
+                    }
+                    compare.CenterItem.PactCode = pactCode;
+                    compare.HisCode = vstr[0];
+                    if (compare.HisCode.Substring(0, 1) == "F" || compare.HisCode.Substring(0, 1) == "Y")
+                    {
+                        compare.Name = vstr[1];
+                        compare.CenterItem.Rate = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[2].ToString());
+                        compare.CenterItem.Memo = vstr[3];
+                        compare.CenterItem.ID = vstr[4];
+                        compare.CenterItem.Specs = vstr[5];
+                        compare.CenterItem.Unit = vstr[6];
+                        compare.CenterItem.MaxPrice = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[7].ToString());
+                        compare.CenterItem.DoseCode = vstr[8];
+                        compare.CenterItem.Company = vstr[9];
+                        compare.CenterItem.ReceipeFlag = vstr[10];
+                        compare.CenterItem.GMPFlag = vstr[11];
+                        compare.CenterItem.PackUnit = vstr[12];
+                        compare.CenterItem.MaxNumber = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[13].ToString());
+                        compare.CenterItem.UpdateDate = vstr[14].ToString();
+                        compare.CenterItem.BeginDate = Neusoft.FrameWork.Function.NConvert.ToDateTime(vstr[15].ToString());
+                        compare.CenterItem.EndDate = Neusoft.FrameWork.Function.NConvert.ToDateTime(vstr[16].ToString());
+                        compare.CenterItem.OperCode = this.oper.ID;
+                        compare.CenterItem.OperDate = sysDate;
+
+                        spell = (Neusoft.HISFC.Models.Base.Spell)this.spellManager.Get(compare.Name.Trim());
+                        compare.CenterItem.SpellCode = spell.SpellCode;
+                        compare.CenterItem.WBCode = spell.WBCode;
+
+                        if (compare.HisCode.Substring(0, 1) == "F")
+                        {
+                            compare.CenterItem.SysClass = "2";
+                        }
+                        else
+                        {
+                            compare.CenterItem.SysClass = "1";
+                        }
+
+                        comparedList.Add(compare);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                this.errText = "解析下载的医保和本地项目的对照目录文档失败 \n" + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                sr.Close();
+            }
+            #endregion
+
+            return 1;
+        }
+
+        /// <summary>
+        /// 获取中心的目录信息
+        /// </summary>
+        /// <param name="drugLists"></param>
+        /// <returns></returns>
+        public int QueryDrugLists(ref System.Collections.ArrayList drugLists, string pactCode)
+        {
+            DateTime sysDate = this.localManager.GetDateTimeFromSysDateTime();
+
+            string filePathZL = Application.StartupPath + "\\DownloadFile\\centerItemList-s.txt";
+
+            //如果有先删除
+            if (System.IO.File.Exists(filePathZL))
+            {
+                System.IO.File.Delete(filePathZL);
+            }
+
+            int returnValue = this.seiInterfaceProxy.down_ml("372500", filePathZL, "", 1, false);
+
+            if (returnValue != 0)
+            {
+                this.errText = "下载医保药品和非药品目录失败 \n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy.get_errtext();
+                return -1;
+            }
+
+            #region 药品目录读取
+            System.IO.StreamReader sr = new System.IO.StreamReader(filePathZL, System.Text.Encoding.Default);
+            Neusoft.HISFC.Models.Base.Spell spell = new Neusoft.HISFC.Models.Base.Spell();
+
+            try
+            {
+                string line = "";
+                Neusoft.HISFC.Models.SIInterface.Item cenItem = null;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (line == "")
+                        continue;
+                    char[] v = new char[] { (char)'\t' };
+                    string[] vstr = line.Split(v);
+                    if (vstr.Length < 17)
+                    {
+                        continue;
+                    }
+                    cenItem = new Neusoft.HISFC.Models.SIInterface.Item();
+                    //cenItem.PactCode = "3";
+                    cenItem.PactCode = pactCode;
+                    cenItem.ID = vstr[0];
+                    cenItem.Name = vstr[1];
+                    cenItem.Indications = vstr[2];//适用症
+                    cenItem.Inhisbition = vstr[3];//禁忌
+                    cenItem.Specs = vstr[4];//规格
+                    cenItem.Unit = vstr[5];//单位
+                    cenItem.MaxPrice = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[6]);//参考价
+                    cenItem.DoseCode = vstr[7];//剂型
+                    cenItem.ValidFlag = vstr[8];//注销标志
+                    cenItem.Company = vstr[9];//生产企业
+                    cenItem.ProdCode = vstr[10];//产地名
+                    cenItem.ReceipeFlag = vstr[11];//处方药标志
+                    cenItem.GMPFlag = vstr[12];//GMP标志
+                    cenItem.PackUnit = vstr[13];//包装单位
+                    cenItem.MinSpecs = vstr[14];//中心规格
+                    cenItem.MaxNumber = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[15]);//恒为1
+                    cenItem.UpdateDate = vstr[16];
+                    cenItem.OperCode = oper.ID;
+                    cenItem.OperDate = sysDate;
+
+                    spell = (Neusoft.HISFC.Models.Base.Spell)this.spellManager.Get(cenItem.Name.Trim());
+                    cenItem.SpellCode = spell.SpellCode;
+                    cenItem.WBCode = spell.WBCode;
+
+                    drugLists.Add(cenItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.errText = "解析下载的医保目录文档失败 \n" + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                sr.Close();
+            }
+            #endregion
+
             return 1;
         }
         #endregion
