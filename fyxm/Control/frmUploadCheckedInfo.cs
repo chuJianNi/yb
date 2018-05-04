@@ -377,6 +377,49 @@ namespace LiaoChengZYSI.Control
                 }
                 #endregion
 
+                #region 3.更新上传标志
+                foreach (Neusoft.HISFC.Models.Fee.Inpatient.FeeItemList f in this.unUploadItemList)
+                {
+                    if (this.localManager.updateUploadFlagInpatient(f) < 0)
+                    {
+                        Neusoft.FrameWork.Management.PublicTrans.RollBack();
+                        MessageBox.Show("更新本地上传标志出错！！" + this.localManager.Err, "错误提示");
+                        break;
+                        return;
+                    }
+                }
+
+                foreach (Neusoft.HISFC.Models.Fee.Inpatient.FeeItemList f in this.unUploadMedList)
+                {
+                    if (this.localManager.updateUploadFlagInpatient(f) < 0)
+                    {
+                        Neusoft.FrameWork.Management.PublicTrans.RollBack();
+                        MessageBox.Show("更新本地上传标志出错！！" + this.localManager.Err, "错误提示");
+                        break;
+                        return;
+                    }
+                }
+                #endregion
+
+                #region 4.断开连接和提交
+                returnValue = this.proManager.Disconnect();
+                if (returnValue != 1)
+                {
+                    MessageBox.Show("待遇接口断开登陆医保服务器失败！", "错误提示");
+                    return;
+                }
+
+                returnValue = this.proManager.Commit();
+                if (returnValue < 0)
+                {
+                    MessageBox.Show("待遇接口提交事务失败！", "错误提示");
+                    return;
+                }
+
+                Neusoft.FrameWork.Management.PublicTrans.Commit();
+
+                MessageBox.Show("费用凭单导入成功！", "友情提示");
+                #endregion
             }
             else
             { 
@@ -398,6 +441,44 @@ namespace LiaoChengZYSI.Control
                     MessageBox.Show("待遇接口撤销患者费用凭单失败！" + this.proManager.ErrMsg, "错误提示");
                     return;
                 }
+                #endregion
+
+                #region 3.更新上传标志
+
+                if (this.localManager.updateUploadFlagInpatientItem(this.Patient) < 0)
+                {
+                    Neusoft.FrameWork.Management.PublicTrans.RollBack();
+                    MessageBox.Show("更新本地上传标志出错！！" + this.localManager.Err, "错误提示");
+                    return;
+                }
+
+                if (this.localManager.updateUploadFlagInpatientMedicine(this.Patient) < 0)
+                {
+                    Neusoft.FrameWork.Management.PublicTrans.RollBack();
+                    MessageBox.Show("更新本地上传标志出错！！" + this.localManager.Err, "错误提示");
+                    return;
+                }
+
+                #endregion
+
+                #region 4.断开连接和提交
+                returnValue = this.proManager.Disconnect();
+                if (returnValue != 1)
+                {
+                    MessageBox.Show("待遇接口断开登陆医保服务器失败！", "错误提示");
+                    return;
+                }
+
+                returnValue = this.proManager.Commit();
+                if (returnValue < 0)
+                {
+                    MessageBox.Show("待遇接口提交事务失败！", "错误提示");
+                    return;
+                }
+
+                Neusoft.FrameWork.Management.PublicTrans.Commit();
+
+                MessageBox.Show("撤销已上传费用凭单成功！", "友情提示");
                 #endregion
             }
         }
