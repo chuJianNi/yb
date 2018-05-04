@@ -2259,7 +2259,8 @@ namespace LiaoChengZYSI
         {
             try
             {
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(seiInterfaceProxy_new);
+                if(seiInterfaceProxy_new != null)
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(seiInterfaceProxy_new);
             }
             catch (Exception e)
             {
