@@ -2257,16 +2257,20 @@ namespace LiaoChengZYSI
         /// <returns>成功 1 失败 -1</returns>
         public long Disconnect()
         {
-            try
-            {
-                if(seiInterfaceProxy_new != null)
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(seiInterfaceProxy_new);
-            }
-            catch (Exception e)
-            {
-                this.errText = e.Message;
-                return -1;
-            }
+            //try
+            //{
+            //    if (seiInterfaceProxy_new != null)
+            //    {
+            //        //seiInterfaceProxy_new.resetvar();
+            //        System.Runtime.InteropServices.Marshal.ReleaseComObject(seiInterfaceProxy_new);
+            //        isInit = false;
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    this.errText = e.Message;
+            //    return -1;
+            //}
             return 1;
         }
 
@@ -2674,7 +2678,7 @@ namespace LiaoChengZYSI
                         continue;
                     char[] v = new char[] { (char)'\t' };
                     string[] vstr = line.Split(v);
-                    if (vstr.Length < 17)
+                    if (vstr.Length < 16)
                     {
                         continue;
                     }
@@ -2683,21 +2687,21 @@ namespace LiaoChengZYSI
                     cenItem.PactCode = pactCode;
                     cenItem.ID = vstr[0];
                     cenItem.Name = vstr[1];
-                    cenItem.Indications = vstr[2];//适用症
-                    cenItem.Inhisbition = vstr[3];//禁忌
-                    cenItem.Specs = vstr[4];//规格
-                    cenItem.Unit = vstr[5];//单位
-                    cenItem.MaxPrice = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[6]);//参考价
-                    cenItem.DoseCode = vstr[7];//剂型
-                    cenItem.ValidFlag = vstr[8];//注销标志
-                    cenItem.Company = vstr[9];//生产企业
-                    cenItem.ProdCode = vstr[10];//产地名
-                    cenItem.ReceipeFlag = vstr[11];//处方药标志
-                    cenItem.GMPFlag = vstr[12];//GMP标志
-                    cenItem.PackUnit = vstr[13];//包装单位
+                    cenItem.Indications = vstr[3];//适用症
+                    cenItem.Inhisbition = vstr[4];//禁忌
+                    cenItem.Specs = vstr[5];//规格
+                    cenItem.Unit = vstr[6];//单位
+                    cenItem.MaxPrice = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[7]);//参考价
+                    cenItem.DoseCode = vstr[8];//剂型
+                    cenItem.ValidFlag = vstr[9];//注销标志
+                    cenItem.Company = vstr[10];//生产企业
+                    cenItem.ProdCode = vstr[11];//产地名
+                    cenItem.ReceipeFlag = vstr[12];//处方药标志
+                    cenItem.GMPFlag = vstr[13];//GMP标志
+                    //cenItem.PackUnit = vstr[14];//包装单位
                     cenItem.MinSpecs = vstr[14];//中心规格
-                    cenItem.MaxNumber = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[15]);//恒为1
-                    cenItem.UpdateDate = vstr[16];
+                    //cenItem.MaxNumber = Neusoft.FrameWork.Function.NConvert.ToDecimal(vstr[15]);//恒为1
+                    //cenItem.UpdateDate = vstr[16];
                     cenItem.OperCode = oper.ID;
                     cenItem.OperDate = sysDate;
 
