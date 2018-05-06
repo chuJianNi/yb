@@ -977,8 +977,8 @@ namespace LiaoChengZYSI.Control
 
         private void downLoadData(string typeCode)
         {
-            Neusoft.FrameWork.WinForms.Classes.Function.ShowWaitForm(Language.Msg("正在下载信息..."));
-            this.typeCode = typeCode;
+            Neusoft.FrameWork.WinForms.Classes.Function.ShowWaitForm(Language.Msg("正在下载信息..."));                        
+            this.typeCode = typeCode;            
             switch (typeCode)
             {
                 case "01":
