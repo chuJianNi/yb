@@ -349,7 +349,7 @@ namespace LiaoChengZYSI.Control
 
             if (this.tabControl1.SelectedIndex == 0)
             {
-                #region 并不能看懂什么意思
+                #region ..
                 foreach (Neusoft.HISFC.Models.Fee.Inpatient.FeeItemList item in this.unUploadItemList)
                 {
                     this.unUploadMedList.Add(item);
