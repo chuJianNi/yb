@@ -2240,7 +2240,7 @@ namespace LiaoChengZYSI
                 }
                 catch (Exception ex)
                 {
-                    this.errText = ex.Message;
+                    this.errText = ex.Message;                    
                     isInit = false;
                     return -1;
                 }
@@ -2285,10 +2285,9 @@ namespace LiaoChengZYSI
         /// <returns></returns>
         private int connInit()
         {
-            int returnValue = 0;
-            if (this.sourceObject.ToString() == "LiaoChengZYSI.Control.ucCompare" || this.sourceObject.ToString() == "LiaoChengZYSI.Control.frmUploadCheckedInfo, Text: 医保费用上传" || this.sourceObject.ToString() == "LiaoChengZYSI.Control.frmUploadFeeDetails, Text: 医保批量上传")
-            {
-                #region new codes
+            int returnValue = 0;            
+
+            #region new codes
                 seiInterfaceProxy_new.resetvar();
                 seiInterfaceProxy_new.putvarstring("yybm", "300774");
                 seiInterfaceProxy_new.putvarstring("gzrybh", "0001");
@@ -2302,7 +2301,7 @@ namespace LiaoChengZYSI
                 }
                 isInit = true;
                 #endregion
-            }
+            
 
             return 1;
         }
@@ -2349,88 +2348,81 @@ namespace LiaoChengZYSI
                 {
                     transType = "1";
                 }
-                Neusoft.FrameWork.Models.NeuObject obj = this.localManager.QueryInpatientFeeItemInfo(patient.ID, itemList.RecipeNO, itemList.SequenceNO, transType);
-                if ((obj != null && !string.IsNullOrEmpty(obj.ID)) || patient.PVisit.InState.ID.Equals("I"))
+
+                #region 调用接口上传明细方法，住院
+
+                #region 参数赋值,自付比例、医嘱流水号等内容没写,计费时间是不是准确
+                seiInterfaceProxy_new.putvarstring("yyxmbm", itemList.Item.ID);//医院项目编码
+
+                seiInterfaceProxy_new.putvarstring("yyxmmc", itemList.Item.Name);//医院项目名称
+
+                decimal price = itemList.Item.Price / itemList.Item.PackQty;
+                seiInterfaceProxy_new.putvardec("dj", (double)price);//最小包装单价
+
+                if (itemList.Item.Specs == null)
                 {
-                    #region 调用接口上传明细方法，住院
-
-                    #region 参数赋值,自付比例、医嘱流水号等内容没写,计费时间是不是准确
-                    seiInterfaceProxy_new.putvarstring("yyxmbm", itemList.Item.ID);//医院项目编码
-
-                    seiInterfaceProxy_new.putvarstring("yyxmmc", itemList.Item.Name);//医院项目名称
-
-                    decimal price = itemList.Item.Price / itemList.Item.PackQty;
-                    seiInterfaceProxy_new.putvardec("dj", (double)price);//最小包装单价
-
-                    if (itemList.Item.Specs == null)
-                    {
-                        itemList.Item.Specs = "1" + itemList.Item.PriceUnit + "/" + itemList.Item.PriceUnit;
-                    }
-                    if (itemList.Item.Specs.Length > 30)
-                    {
-                        itemList.Item.Specs = itemList.Item.Specs.Substring(0, 30);
-                    }
-                    seiInterfaceProxy_new.putvarstring("gg", itemList.Item.Specs);//规格
-
-                    seiInterfaceProxy_new.putvardec("sl", (double)(itemList.Item.Qty / itemList.Item.PackQty));//大包装数量
-
-                    seiInterfaceProxy_new.putvardec("bzsl", (double)itemList.Item.PackQty);//大包装中包含小包装的数量
-
-                    decimal totCost = itemList.Item.Price * itemList.Item.Qty / itemList.Item.PackQty;
-                    totCost = Neusoft.FrameWork.Function.NConvert.ToDecimal(Neusoft.FrameWork.Public.String.FormatNumberReturnString(totCost, 2));
-                    seiInterfaceProxy_new.putvardec("zje", (double)totCost); //总金额
-
-                    #region 获取执行科室的医保对照科室编码
-                    string operDeptID = string.Empty;
-                    if (this.localManager.GetComparedDoctCode(itemList.ExecOper.Dept.ID, "1", ref operDeptID) != 1)
-                    {
-                        this.errText = "获取对照的科室信息出错！" + this.localManager.Err;
-                        return -1;
-                    }
-                    if (string.IsNullOrEmpty(operDeptID))
-                    {
-                        this.errText = "获取科室对照信息出错！" + "【" + itemList.ExecOper.Dept.ID + "】未进行科室对照！";
-                        return -1;
-                    }
-                    #endregion
-
-                    seiInterfaceProxy_new.putvarstring("kdksbm", operDeptID);//operDeptID);//开单科室编码
-
-                    seiInterfaceProxy_new.putvarstring("zxksbm", operDeptID);//operDeptID);//执行科室
-
-                    seiInterfaceProxy_new.putvarstring("sfryxm", itemList.FeeOper.Name);//收费员姓名
-
-                    #region 自负比例是不是不能用啊，医嘱流水号也没有写
-                    
-                    #endregion
-                    seiInterfaceProxy_new.putvardec("sxzfbl", 1);//(double)rate);//自付比例
-
-                    dt = itemList.FeeOper.OperTime.Date;
-                    #region 这个是不是应该写在这？
-                    if (dt > patient.PVisit.OutTime && patient.PVisit.OutTime > new DateTime(2010, 01, 01))//{4F9D25BE-09A0-4fa3-A339-EC58E5374B8F}
-                    {
-                        dt = patient.PVisit.OutTime;
-                    }
-                    #endregion
-                    seiInterfaceProxy_new.putvardatetime("fyfssj", dt); //费用发生时间
-
-                    seiInterfaceProxy_new.putvarstring("sm", ""); //说明
-
-                    #endregion
-
-                    returnValue = this.seiInterfaceProxy_new.request_service("put_fymx");
-                    if (returnValue != 0)
-                    {
-                        this.errText = "保存住院费用信息到内存失败\n参数赋值以后 \n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy_new.get_errtext();
-                        return -1;
-                    }
-                    #endregion
+                    itemList.Item.Specs = "1" + itemList.Item.PriceUnit + "/" + itemList.Item.PriceUnit;
                 }
-                else
+                if (itemList.Item.Specs.Length > 30)
                 {
-                    this.errText = "生成住院费用凭单信息失败！\n" + this.localManager.Err;
+                    itemList.Item.Specs = itemList.Item.Specs.Substring(0, 30);
+                }
+                seiInterfaceProxy_new.putvarstring("gg", itemList.Item.Specs);//规格
+
+                seiInterfaceProxy_new.putvardec("sl", (double)(itemList.Item.Qty / itemList.Item.PackQty));//大包装数量
+
+                seiInterfaceProxy_new.putvardec("bzsl", (double)itemList.Item.PackQty);//大包装中包含小包装的数量
+
+                decimal totCost = itemList.Item.Price * itemList.Item.Qty / itemList.Item.PackQty;
+                totCost = Neusoft.FrameWork.Function.NConvert.ToDecimal(Neusoft.FrameWork.Public.String.FormatNumberReturnString(totCost, 2));
+                seiInterfaceProxy_new.putvardec("zje", (double)totCost); //总金额
+
+                #region 获取执行科室的医保对照科室编码
+                string operDeptID = string.Empty;
+                if (this.localManager.GetComparedDoctCode(itemList.ExecOper.Dept.ID, "1", ref operDeptID) != 1)
+                {
+                    this.errText = "获取对照的科室信息出错！" + this.localManager.Err;
                     return -1;
                 }
+                if (string.IsNullOrEmpty(operDeptID))
+                {
+                    this.errText = "获取科室对照信息出错！" + "【" + itemList.ExecOper.Dept.ID + "】未进行科室对照！";
+                    return -1;
+                }
+                #endregion
+
+                seiInterfaceProxy_new.putvarstring("kdksbm", operDeptID);//operDeptID);//开单科室编码
+
+                seiInterfaceProxy_new.putvarstring("zxksbm", operDeptID);//operDeptID);//执行科室
+
+                seiInterfaceProxy_new.putvarstring("sfryxm", itemList.FeeOper.Name);//收费员姓名
+
+                #region 自负比例是不是不能用啊，医嘱流水号也没有写
+                
+                #endregion
+                seiInterfaceProxy_new.putvardec("sxzfbl", 1);//(double)rate);//自付比例
+
+                dt = itemList.FeeOper.OperTime.Date;
+                #region 这个是不是应该写在这？
+                if (dt > patient.PVisit.OutTime && patient.PVisit.OutTime > new DateTime(2010, 01, 01))//{4F9D25BE-09A0-4fa3-A339-EC58E5374B8F}
+                {
+                    dt = patient.PVisit.OutTime;
+                }
+                #endregion
+                seiInterfaceProxy_new.putvardatetime("fyfssj", dt); //费用发生时间
+
+                seiInterfaceProxy_new.putvarstring("sm", ""); //说明
+
+                #endregion
+
+                returnValue = this.seiInterfaceProxy_new.request_service("put_fymx");
+                if (returnValue != 0)
+                {
+                    this.errText = "保存住院费用信息到内存失败\n参数赋值以后 \n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy_new.get_errtext();
+                    return -1;
+                }
+                #endregion
+
             }
             #endregion
 
@@ -2502,11 +2494,7 @@ namespace LiaoChengZYSI
             #endregion
 
             return 1;
-        }
-
-        #region 以下两个方法的目录读取是否每一项一一对应没有检查
-        
-        #endregion
+        }        
 
         /// <summary>
         /// 根据需求将此方法征用
@@ -2726,6 +2714,241 @@ namespace LiaoChengZYSI
             return 1;
         }
         #endregion
+
+        #region 以下为新写的内容
+        
+        #endregion
+
+        Neusoft.HISFC.BizLogic.Pharmacy.Item itemManager = new Neusoft.HISFC.BizLogic.Pharmacy.Item();
+
+        /// <summary>
+        /// 批量上传住院患者医嘱
+        /// </summary>
+        /// <param name="patient">住院患者基本信息实体</param>
+        /// <param name="feeDetails">住院患者医嘱信息实体集合</param>
+        /// <returns>成功 1 失败 -1</returns>
+        public int UploadOrderDetailsInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, ref System.Collections.ArrayList orderDetails)
+        {
+            int returnValue = 0;
+
+            string transType = string.Empty;
+            DateTime dt = DateTime.MinValue;
+
+            #region 住院初始化
+
+            //住院初始化
+            seiInterfaceProxy_new.resetvar();
+            seiInterfaceProxy_new.putvarstring("blh", patient.ID);
+            returnValue = seiInterfaceProxy_new.request_service("init_zy");
+            if (returnValue != 0)
+            {
+                this.errText = "初始化住院信息失败 \n错误代码：" + returnValue + "\n病历号：" + patient.ID + "\n错误内容：" + this.seiInterfaceProxy_new.get_errtext();
+                return -1;
+            }
+            #endregion
+
+            #region 开始写一些上传医嘱的内容
+
+            foreach (object obj in orderDetails)
+            {
+                Neusoft.HISFC.Models.Order.Inpatient.Order order = obj as Neusoft.HISFC.Models.Order.Inpatient.Order;
+
+                if (order == null)
+                    continue;
+
+                if (order.Status == 3)		//不显示作废/停止医嘱
+                    continue;
+                #region new codes
+                seiInterfaceProxy_new.resetvar();
+                seiInterfaceProxy_new.putvarstring("yzlsh", order.ID); //医嘱流水号
+                seiInterfaceProxy_new.putvarstring("yzzh", order.Combo.ID); //医嘱组号
+                //seiInterfaceProxy_new.putvarstring("yzly", "");
+                #region 获取执行科室的医保对照科室编码
+                string operDeptID = string.Empty;
+                if (this.localManager.GetComparedDoctCode(order.ReciptDept.ID, "1", ref operDeptID) != 1)
+                {
+                    this.errText = "获取对照的科室信息出错！" + this.localManager.Err;
+                    return -1;
+                }
+                if (string.IsNullOrEmpty(operDeptID))
+                {
+                    this.errText = "获取科室对照信息出错！" + "【" + order.ReciptDept.ID + "】未进行科室对照！";
+                    return -1;
+                }
+                #endregion
+                seiInterfaceProxy_new.putvarstring("ksbm", operDeptID);  //科室编码
+                #region 医生对照
+                string centerDoctID = string.Empty;
+                string doctCode = string.Empty;
+                doctCode = patient.PVisit.ConsultingDoctor.ID;//主任医师
+
+                if (string.IsNullOrEmpty(doctCode))
+                {
+                    this.errText = "保存住院患者费用凭单信息失败\n医师代码为空值 \n错误代码：01" + "\n错误内容：没有找到开立医师的编码";
+                    return -1;
+                }
+                else
+                {
+                    if (this.localManager.GetComparedDoctCode(doctCode, "0", ref centerDoctID) != 1)
+                    {
+                        this.errText = "获取对照的医师信息出错！" + this.localManager.Err;
+                        return -1;
+                    }
+                }
+                #endregion
+                seiInterfaceProxy_new.putvarstring("klysbm", centerDoctID);  //开立医师编码
+                seiInterfaceProxy_new.putvardatetime("yzfssj", order.MOTime); //医嘱发生时间
+                seiInterfaceProxy_new.putvardatetime("qsrq", order.BeginTime); //起始执行时间
+                seiInterfaceProxy_new.putvardatetime("zzrq", DateTime.Now);//终止执行时间
+                seiInterfaceProxy_new.putvarstring("zzysbm", centerDoctID); //终止医师编码
+                #region 医嘱名称
+
+                if (order.Item.Specs == null || order.Item.Specs.Trim() == "")
+                {
+                    seiInterfaceProxy_new.putvarstring("yznr", order.Item.Name); //医嘱内容= ;
+                }
+                else
+                {
+                    //加入商品名称  {fff989e6-8b66-4375-953b-d727ece2bd71} added by guoly 
+                    if (order.Item.GetType() == typeof(Neusoft.HISFC.Models.Pharmacy.Item))
+                    {
+                        Neusoft.HISFC.Models.Pharmacy.Item objitem = itemManager.GetItem(order.Item.ID);
+                        seiInterfaceProxy_new.putvarstring("yznr", order.Item.Name + (string.IsNullOrEmpty(objitem.NameCollection.RegularName) == true ? "" : "(" + objitem.NameCollection.RegularName + ")") + "[" + order.Item.Specs + "]");
+                    }
+                    else
+                    {
+                        seiInterfaceProxy_new.putvarstring("yznr",   order.Item.Name + "[" + order.Item.Specs + "]");
+                    }
+
+                }
+
+                #endregion
+                
+                seiInterfaceProxy_new.putvarstring("yzsm", order.Memo); //医嘱说明
+                if(order.OrderType.Type.ToString()=="LONG")
+                    seiInterfaceProxy_new.putvarstring("yzlx","1"); //医嘱类型
+                else
+                    seiInterfaceProxy_new.putvarstring("yzlx", "2"); //医嘱类型
+                //seiInterfaceProxy_new.putvarstring("cw", "2"); //床位
+
+                returnValue= seiInterfaceProxy_new.request_service("save_yz");
+
+
+
+                if (returnValue != 0)
+                {
+                    string YBerrText = seiInterfaceProxy_new.get_errtext();
+                    this.errText = "保存医嘱失败." + "\n错误代码：" + returnValue + "\n医师编码：" + centerDoctID + "   "+patient.PVisit.ConsultingDoctor.Name + "\n错误内容：" + YBerrText;
+                    return -1;
+                }
+
+                #endregion                               
+            }
+            #endregion
+            
+            return 1;
+        }
+
+        /// <summary>
+        /// 上传住院患者病历首页
+        /// </summary>
+        /// <param name="patient">住院患者基本信息实体</param>
+        /// <param name="feeDetails"></param>
+        /// <returns>成功 1 失败 -1</returns>
+        public int UploadRecordFirstInpatient(Neusoft.HISFC.Models.RADT.PatientInfo patient, ref System.Collections.ArrayList recordDetails)
+        {
+            //Neusoft.HISFC.BizProcess.MRS.Integrate intergrateMag = new Neusoft.HISFC.BizProcess.MRS.Integrate();
+            Neusoft.HISFC.Models.MRS.BaseInfo baseInfo = new Neusoft.HISFC.Models.MRS.BaseInfo();
+            Neusoft.HISFC.MRS.BizLogic.Base baseMag = new Neusoft.HISFC.MRS.BizLogic.Base();
+            
+            int res=baseMag.GetBaseInfo(patient.ID,ref baseInfo);
+            if (res != 1)
+            {               
+                this.errText="获取病历首页信息失败"+res;
+                return -1;
+            }
+
+            #region 住院初始化
+
+            //住院初始化
+            seiInterfaceProxy_new.resetvar();
+            seiInterfaceProxy_new.putvarstring("blh", patient.ID);
+            res = seiInterfaceProxy_new.request_service("init_zy");
+            if (res != 0)
+            {
+                this.errText = "初始化住院信息失败 \n错误代码：" + res + "\n病历号：" + patient.ID + "\n错误内容：" + this.seiInterfaceProxy_new.get_errtext();
+                return -1;
+            }
+            #endregion
+
+            #region 疾病诊断上传
+            seiInterfaceProxy_new.resetvar();
+            seiInterfaceProxy_new.putvarstring("sxh", "001"); //顺序号 * 诊断的唯一标识号
+            seiInterfaceProxy_new.putvarstring("jbzdlb", "12"); //疾病诊断类别 *
+            seiInterfaceProxy_new.putvarstring("jbbm", baseInfo.MainDiag.DiagAfterCode.ID); //诊断代码 *
+            seiInterfaceProxy_new.putvarstring("rybq", baseInfo.MainDiagCondition.ID); //入院病情 *
+            //seiInterfaceProxy_new.putvarstring("zdms", "3007740052");// 诊断描述
+
+            res = seiInterfaceProxy_new.request_service("put_jbzd");
+
+
+
+            if (res != 0)
+            {
+                string YBerrText = seiInterfaceProxy_new.get_errtext();
+                this.errText = "疾病诊断上传失败." + "\n错误代码：" + res + "\n错误内容：" + YBerrText;
+                return -1;
+            }
+
+            #endregion
+
+            //this.errText = "zhuzhi" + baseInfo.AttendingDoc;
+                //+ "id" + baseInfo.InDept.ID + "\n" + "name" + baseInfo.InDept.Name + "\n" + "memo" + baseInfo.InDept.Memo;
+            
+            Neusoft.FrameWork.Public.ObjectHelper deptHelper = new Neusoft.FrameWork.Public.ObjectHelper(); //不管用
+            //this.errText = deptHelper.GetName(baseInfo.AttendingDoc.ID) + baseInfo.AttendingDoc.ID + "s" + deptHelper.GetName(baseInfo.InDept.ID);
+            
+            #region 病历首页上传
+            seiInterfaceProxy_new.resetvar();
+            seiInterfaceProxy_new.putvarstring("zyh", patient.ID); //住院号 *
+            seiInterfaceProxy_new.putvarstring("rytj", baseInfo.InType.ID); //入院途径 *
+            seiInterfaceProxy_new.putvardatetime("zyrq", baseInfo.InTime);  //住院日期 *
+            seiInterfaceProxy_new.putvardatetime("cyrq", baseInfo.OutTime);  //出院日期 *
+            seiInterfaceProxy_new.putvarstring("sfqz", baseInfo.MainDiagCondition.ID); //是否确诊 *
+            seiInterfaceProxy_new.putvarstring("ryks", baseInfo.InDept.ID); //入院科室 *
+            seiInterfaceProxy_new.putvarstring("cyks", baseInfo.OutDept.ID);//出院科室 *
+            seiInterfaceProxy_new.putvarstring("xx", ((int)baseInfo.BloodType).ToString()); //血型 *
+            seiInterfaceProxy_new.putvarstring("rhxx", ((int)baseInfo.RH).ToString()); //rh血型 *
+            seiInterfaceProxy_new.putvarstring("lyfs", baseInfo.OutType.ID); // 离院方式 *
+            seiInterfaceProxy_new.putvarstring("cyxj", "无"); //出院小结 * 出院记录
+            //seiInterfaceProxy_new.putvarstring("kzrysbm", "2"); //科主任
+            //seiInterfaceProxy_new.putvarstring("zrysbm", "");  //主任（副主任）医师
+            seiInterfaceProxy_new.putvarstring("zzysbm", baseInfo.AttendingDoc.ID);//主治医师 *
+            seiInterfaceProxy_new.putvarstring("zyysbm", baseInfo.InhosDoc.ID); //住院医师 *
+            seiInterfaceProxy_new.putvarstring("zrhsysbm",baseInfo.DutyNurse.ID); //责任护士 *
+            //seiInterfaceProxy_new.putvarstring("jxysbm", ""); // 进修医师
+            //seiInterfaceProxy_new.putvarstring("sxysbm", ""); //实习医师 
+            seiInterfaceProxy_new.putvarstring("lxr", baseInfo.ContactName); //联系人 *
+            seiInterfaceProxy_new.putvarstring("lxrgx", baseInfo.RelationshipSpecific); //联系人关系 *
+            seiInterfaceProxy_new.putvarstring("lxrdh", "无"); //联系人电话 *
+            seiInterfaceProxy_new.putvarstring("brlxdh", "无"); //病人联系电话 *
+            //seiInterfaceProxy_new.putvarstring("zcyybm", ""); //转出医疗机构编码 
+
+            res = seiInterfaceProxy_new.request_service("save_case");
+
+
+
+            if (res != 0)
+            {
+                string YBerrText = seiInterfaceProxy_new.get_errtext();
+                this.errText = "病历首页上传失败." + "\n错误代码：" + res + "\n错误内容：" + YBerrText;                
+                return -1;
+            }
+
+            #endregion
+
+            return 1;
+        }
     }
 
 
