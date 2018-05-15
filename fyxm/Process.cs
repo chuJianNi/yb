@@ -2838,7 +2838,8 @@ namespace LiaoChengZYSI
                 if (returnValue != 0)
                 {
                     string YBerrText = seiInterfaceProxy_new.get_errtext();
-                    this.errText = "保存医嘱失败." + "\n错误代码：" + returnValue + "\n医师编码：" + centerDoctID + "   "+patient.PVisit.ConsultingDoctor.Name + "\n错误内容：" + YBerrText;
+                    this.errText = "保存医嘱失败." + "\n错误代码：" + returnValue + "\n医师编码：" + centerDoctID + "   "+patient.PVisit.ConsultingDoctor.Name +
+                        "\n科室编码："+order.ReciptDept.ID+"  中心科室编码："+operDeptID+"\n错误内容：" + YBerrText;
                     return -1;
                 }
 
@@ -2914,6 +2915,7 @@ namespace LiaoChengZYSI
             seiInterfaceProxy_new.putvarstring("rytj", baseInfo.InType.ID); //入院途径 *
             seiInterfaceProxy_new.putvardatetime("zyrq", baseInfo.InTime);  //住院日期 *
             seiInterfaceProxy_new.putvardatetime("cyrq", baseInfo.OutTime);  //出院日期 *
+            seiInterfaceProxy_new.putvardatetime("qzrq", baseInfo.InTime);  //确诊日期 *
             seiInterfaceProxy_new.putvarstring("sfqz", baseInfo.MainDiagCondition.ID); //是否确诊 *
             seiInterfaceProxy_new.putvarstring("ryks", baseInfo.InDept.ID); //入院科室 *
             seiInterfaceProxy_new.putvarstring("cyks", baseInfo.OutDept.ID);//出院科室 *
