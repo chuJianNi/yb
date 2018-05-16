@@ -2453,7 +2453,8 @@ namespace LiaoChengZYSI
             returnValue = seiInterfaceProxy_new.request_service("save_zy_script");
             if (returnValue != 0)
             {
-                this.errText = "保存住院患者费用凭单信息失败\n中心医师代码：" + centerDoctID + "\n费用日期：" + dt.ToString() + "\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy_new.get_errtext();
+                this.errText = "保存住院患者费用凭单信息失败\n中心医师代码：" + centerDoctID + "     中心医师代码：" + patient.PVisit.ConsultingDoctor.Name +
+                    "\n费用日期：" + dt.ToLongDateString() + "\n错误代码：" + returnValue + "\n错误内容：" + this.seiInterfaceProxy_new.get_errtext();
                 return -1;
             }
             #endregion
