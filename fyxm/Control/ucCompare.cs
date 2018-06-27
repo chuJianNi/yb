@@ -864,6 +864,7 @@ namespace LiaoChengZYSI.Control
         /// </summary>
         private int downLoadSIList()
         {
+            Process.isInit = false;
             long returnValue = 0;
             
             returnValue = this.proManager.Connect();
@@ -1007,6 +1008,7 @@ namespace LiaoChengZYSI.Control
         /// <returns></returns>
         private int downLoadCompareInfo()
         {
+            Process.isInit = false;
             ArrayList comparedItemList = new ArrayList();
 
             long returnValue = 0;
@@ -1153,6 +1155,7 @@ namespace LiaoChengZYSI.Control
             string[] blocks = CailiaoCode.Split(',');
             bool isCailiao = false;
 
+            Process.isInit = false;
             #region 1.先测试是否能连上医保
             returnValue = this.proManager.Connect();
             if (returnValue != 1)
